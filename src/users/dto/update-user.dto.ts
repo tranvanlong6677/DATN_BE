@@ -1,21 +1,45 @@
-import { IsEmail } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+} from 'class-validator';
 import mongoose from 'mongoose';
 import { Company } from 'src/companies/schema/company.schema';
 
+export class UpdateUserDtoByAdmin {
+  @IsNotEmpty()
+  name: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @IsNotEmpty()
+  age: number;
+
+  @IsNotEmpty()
+  gender: string;
+
+  @IsNotEmpty()
+  address: string;
+
+  @IsNotEmpty()
+  role: mongoose.Schema.Types.ObjectId;
+
+  // @IsNotEmpty()
+  company: Company;
+}
+
 export class UpdateUserDto {
-    name: string
+  @IsNotEmpty()
+  name: string;
 
-    @IsEmail()
-    email: string
+  @IsNotEmpty()
+  age: number;
 
-    age: number
+  @IsNotEmpty()
+  gender: string;
 
-    gender: string
-
-    address: string
-
-    role: mongoose.Schema.Types.ObjectId
-
-    company: Company
-
-} 
+  @IsNotEmpty()
+  address: string;
+}

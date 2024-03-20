@@ -3,7 +3,10 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  UpdateUserDto,
+  UpdateUserDtoByAdmin,
+} from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
@@ -94,11 +97,11 @@ export class UsersService {
     };
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return 'Not valid';
     }
-    return this.userModel
+    return await this.userModel
       .findOne({ _id: id })
       .select('-password')
       .populate({
@@ -123,10 +126,27 @@ export class UsersService {
   }
 
   async update(updateUserDto: UpdateUserDto, user: IUser) {
+    console.log('check service', updateUserDto);
     return await this.userModel.updateOne(
       { _id: user._id },
       {
         ...updateUserDto,
+      },
+    );
+  }
+  async updateById(
+    id: string,
+    updateUserDtoByAdmin: UpdateUserDtoByAdmin,
+    user: IUser,
+  ) {
+    console.log(
+      'updateUserDtoByAdmin',
+      updateUserDtoByAdmin,
+    );
+    return await this.userModel.updateOne(
+      { _id: id },
+      {
+        ...updateUserDtoByAdmin,
       },
     );
   }
@@ -177,11 +197,7 @@ export class UsersService {
     const userData = await this.userModel.findOne({
       _id: user._id,
     });
-    console.log('DB is ', userData?.password);
-    console.log('hash', this.hashPassword(oldPassword));
-    console.log(
-      this.isValidPassword(oldPassword, userData?.password),
-    );
+
     if (
       !this.isValidPassword(oldPassword, userData?.password)
     ) {

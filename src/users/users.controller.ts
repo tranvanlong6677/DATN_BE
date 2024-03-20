@@ -11,7 +11,10 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  UpdateUserDto,
+  UpdateUserDtoByAdmin,
+} from './dto/update-user.dto';
 import {
   Public,
   ResponseMessage,
@@ -37,7 +40,7 @@ export class UsersController {
 
   @Get()
   @ResponseMessage('Fetch user with paginate')
-  @UseGuards(JwtStrategy)
+  // @UseGuards(JwtStrategy)
   fetchUserPaginate(
     @Query('current') currentPage: string,
     @Query('pageSize') limit: string,
@@ -59,32 +62,46 @@ export class UsersController {
   }
 
   @Patch()
-  @ResponseMessage('Update a User')
-  @UseGuards(JwtStrategy)
+  @ResponseMessage('Update a user successfully!')
+  // @UseGuards(JwtStrategy)
   update(
     @Body() updateUserDto: UpdateUserDto,
     @User() user: IUser,
   ) {
+    console.log('updateUserDto', updateUserDto);
     return this.usersService.update(updateUserDto, user);
   }
 
-  @Delete(':id')
-  @UseGuards(JwtStrategy)
-  @ResponseMessage('Delete a User')
-  remove(@Param('id') id: string, @User() user: IUser) {
-    return this.usersService.remove(id, user);
+  @Patch(':id')
+  @ResponseMessage('Update a User by admin')
+  updateById(
+    @Body() updateUserDtoByAdmin: UpdateUserDtoByAdmin,
+    @User() user: IUser,
+    @Param('id') id: string,
+  ) {
+    console.log('admin');
+    return this.usersService.updateById(
+      id,
+      updateUserDtoByAdmin,
+      user,
+    );
   }
 
   @Patch('/change-password')
   @ResponseMessage('Update password successfully')
   changePassword(@User() user: IUser, @Body() body) {
     const { oldPassword, newPassword } = body;
-    console.log('>>>>>>>>>>>>>  oldPassword', oldPassword);
-    console.log('>>>>>>>>>>>>>  newPassword', newPassword);
     return this.usersService.changePassword(
       user,
       oldPassword,
       newPassword,
     );
+  }
+
+  @Delete(':id')
+  // @UseGuards(JwtStrategy)
+  @ResponseMessage('Delete a User')
+  remove(@Param('id') id: string, @User() user: IUser) {
+    return this.usersService.remove(id, user);
   }
 }
