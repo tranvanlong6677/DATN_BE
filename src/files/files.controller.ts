@@ -19,21 +19,33 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   Public,
   ResponseMessage,
+  User,
 } from 'src/decorator/customize';
 import { HttpExceptionFilter } from 'src/core/http-exception.filter';
+import path, { join } from 'path';
+import { IUser } from 'src/users/users.interface';
+import { InjectModel } from '@nestjs/mongoose';
+import {
+  Resume,
+  ResumeDocument,
+} from 'src/resumes/schema/resume.schema';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import * as fs from 'fs';
+const cloudinary = require('cloudinary').v2;
 
 @Controller('files')
 export class FilesController {
   constructor(
     private readonly filesService: FilesService,
+    @InjectModel(Resume.name)
+    private resumeModel: SoftDeleteModel<ResumeDocument>,
   ) {}
 
   @Post('upload')
-  @Public()
   @ResponseMessage('Upload file success')
   @UseInterceptors(FileInterceptor('fileUpload'))
   @UseFilters(new HttpExceptionFilter())
-  uploadFile(
+  async uploadFile(
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addFileTypeValidator({
@@ -49,8 +61,52 @@ export class FilesController {
         }),
     )
     file: Express.Multer.File,
+    @User() user: IUser,
+    @Body() body: any,
   ) {
-    return { fileName: file.filename };
+    console.log('hihi', body.jobId);
+    const resultUploadCloud =
+      await cloudinary.uploader.upload(
+        `${join(
+          process.cwd(),
+          `public/images/resume/${file.filename}`,
+        )}`,
+        {
+          public_id: `${file.filename
+            .split('.')
+            .slice(0, -1)
+            .join('.')}`,
+          folder: 'resumes',
+          resource_type: 'image',
+          eager: [
+            {
+              format: 'jpg',
+            },
+          ],
+        },
+        function (error, result) {
+          // console.log(result);
+        },
+      );
+    console.log('resultUploadCloud', resultUploadCloud);
+    const filePath = path.join(
+      __dirname,
+      '..',
+      '..',
+      'public',
+      'images',
+      'resume',
+      `${file.filename}`,
+    );
+    fs.unlinkSync(filePath);
+    await this.resumeModel.updateOne(
+      { userId: user._id, jobId: body.jobId },
+      { url: resultUploadCloud?.eager[0]?.url },
+    );
+    return {
+      fileName: file.filename,
+      url: resultUploadCloud?.eager[0]?.url,
+    };
   }
 
   @Get()

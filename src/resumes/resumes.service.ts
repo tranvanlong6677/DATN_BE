@@ -28,27 +28,62 @@ export class ResumesService {
   ) {
     const newId = new mongoose.Types.ObjectId();
     const newDate = new Date();
-    await this.resumeModel.create({
-      _id: newId,
-      email: user.email,
+    console.log('createUserCvDto', creatUserCvDto);
+    const isExist = await this.resumeModel.findOne({
       userId: user._id,
-      status: 'PENDING',
-      history: [
-        {
-          status: 'PENDING',
-          updatedAt: newDate,
-          updatedBy: {
-            _id: user._id,
-            email: user.email,
-          },
-        },
-      ],
-      ...creatUserCvDto,
+      companyId: creatUserCvDto.companyId,
+      jobId: creatUserCvDto.jobId,
     });
-    return {
-      _id: newId,
-      createdAt: newDate,
-    };
+    if (isExist) {
+      console.log('exist');
+      await this.resumeModel.updateOne(
+        { _id: isExist._id },
+        {
+          email: user.email,
+          userId: user._id,
+          status: 'PENDING',
+          history: [
+            {
+              status: 'PENDING',
+              updatedAt: newDate,
+              updatedBy: {
+                _id: user._id,
+                email: user.email,
+              },
+            },
+          ],
+          ...creatUserCvDto,
+          url: '',
+        },
+      );
+      return {
+        _id: isExist._id,
+        updatedAt: newDate,
+      };
+    } else {
+      await this.resumeModel.create({
+        _id: newId,
+        email: user.email,
+        userId: user._id,
+        status: 'PENDING',
+        history: [
+          {
+            status: 'PENDING',
+            updatedAt: newDate,
+            updatedBy: {
+              _id: user._id,
+              email: user.email,
+            },
+          },
+        ],
+        ...creatUserCvDto,
+        url: '',
+      });
+      return {
+        _id: newId,
+        createdAt: newDate,
+      };
+    }
   }
 
   async findAll(
