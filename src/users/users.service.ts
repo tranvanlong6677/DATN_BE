@@ -34,7 +34,7 @@ export class UsersService {
     private roleModel: SoftDeleteModel<RoleDocument>,
   ) {}
   hashPassword = (password: string) => {
-    var salt = genSaltSync(10);
+    const salt = genSaltSync(10);
     return hashSync(password, salt);
   };
   async create(createUserDto: CreateUserDto, user: IUser) {

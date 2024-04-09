@@ -153,7 +153,7 @@ export class AuthService {
         ),
       });
 
-      let user = await this.usersService.getUserByToken(
+      const user = await this.usersService.getUserByToken(
         refreshToken,
       );
       if (user) {

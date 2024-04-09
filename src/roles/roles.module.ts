@@ -7,7 +7,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 @Module({
   controllers: [RolesController],
   providers: [RolesService],
-  imports: [MongooseModule.forFeature([{ name: Role.name, schema: RoleSchema }])],
-  exports: [RolesService]
+  imports: [
+    MongooseModule.forFeature([
+      { name: Role.name, schema: RoleSchema },
+    ]),
+  ],
+  exports: [RolesService],
 })
-export class RolesModule { }
+export class RolesModule {}

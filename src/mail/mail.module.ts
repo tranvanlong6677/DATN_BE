@@ -7,21 +7,32 @@ import path, { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Job, JobSchema } from 'src/jobs/shema/job.schema';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Subscriber, SubscriberSchema } from 'src/subscribers/schema/subscriber.schema';
+import {
+  Subscriber,
+  SubscriberSchema,
+} from 'src/subscribers/schema/subscriber.schema';
 
 @Module({
   imports: [
     MailerModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({
         transport: {
-          host: configService.get<string>("EMAIL_HOST"),
+          host: configService.get<string>('EMAIL_HOST'),
           secure: false,
           auth: {
-            user: configService.get<string>("EMAIL_AUTH_USER"),
-            pass: configService.get<string>("PASSWORD_EMAIL"),
+            user: configService.get<string>(
+              'EMAIL_AUTH_USER',
+            ),
+            pass: configService.get<string>(
+              'PASSWORD_EMAIL',
+            ),
           },
         },
-        preview: configService.get<string>("EMAIL_PREVIEW") === "true" ? true : false,
+        preview:
+          configService.get<string>('EMAIL_PREVIEW') ===
+          'true'
+            ? true
+            : false,
         template: {
           dir: join(__dirname, 'templates'),
           adapter: new HandlebarsAdapter(),
@@ -40,11 +51,14 @@ import { Subscriber, SubscriberSchema } from 'src/subscribers/schema/subscriber.
       }),
       inject: [ConfigService],
     }),
-    MongooseModule.forFeature([{ name: Job.name, schema: JobSchema }]),
-    MongooseModule.forFeature([{ name: Subscriber.name, schema: SubscriberSchema }])
+    MongooseModule.forFeature([
+      { name: Job.name, schema: JobSchema },
+    ]),
+    MongooseModule.forFeature([
+      { name: Subscriber.name, schema: SubscriberSchema },
+    ]),
   ],
   controllers: [MailController],
-  providers: [MailService]
+  providers: [MailService],
 })
-export class MailModule { }
-
+export class MailModule {}

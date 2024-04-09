@@ -1,7 +1,7 @@
 export class UpdateCompanyDto {
-    name: string;
+  name: string;
 
-    address: string;
+  address: string;
 
-    description: string;
+  description: string;
 }

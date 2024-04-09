@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-var-requires */
 import {
   Controller,
   Get,
@@ -64,7 +66,6 @@ export class FilesController {
     @User() user: IUser,
     @Body() body: any,
   ) {
-    console.log('hihi', body.jobId);
     const resultUploadCloud =
       await cloudinary.uploader.upload(
         `${join(
@@ -78,17 +79,13 @@ export class FilesController {
             .join('.')}`,
           folder: 'resumes',
           resource_type: 'image',
-          eager: [
-            {
-              format: 'jpg',
-            },
-          ],
         },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         function (error, result) {
-          // console.log(result);
+          console.log('error', error);
         },
       );
-    console.log('resultUploadCloud', resultUploadCloud);
+
     const filePath = path.join(
       __dirname,
       '..',
@@ -101,11 +98,11 @@ export class FilesController {
     fs.unlinkSync(filePath);
     await this.resumeModel.updateOne(
       { userId: user._id, jobId: body.jobId },
-      { url: resultUploadCloud?.eager[0]?.url },
+      { url: resultUploadCloud?.url },
     );
     return {
       fileName: file.filename,
-      url: resultUploadCloud?.eager[0]?.url,
+      url: resultUploadCloud?.url,
     };
   }
 

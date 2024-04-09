@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Controller,
   Get,
@@ -79,5 +80,11 @@ export class ResumesController {
   @ResponseMessage('Get resumes by user')
   getCvByUser(@User() user: IUser) {
     return this.resumesService.getCvByUser(user._id);
+  }
+
+  @Post('in-week')
+  @ResponseMessage('Get resumes in week')
+  getCvInWeek(@User() user: IUser) {
+    return this.resumesService.getCvInWeek();
   }
 }

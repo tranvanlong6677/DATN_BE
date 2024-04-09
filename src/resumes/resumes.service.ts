@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Injectable } from '@nestjs/common';
 import {
   CreatUserCvDto,
@@ -14,6 +16,7 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import mongoose from 'mongoose';
 import aqp from 'api-query-params';
 import { isEmpty } from 'class-validator';
+import { differenceInSeconds } from 'date-fns';
 
 @Injectable()
 export class ResumesService {
@@ -184,5 +187,23 @@ export class ResumesService {
         { path: 'jobId', select: { name: 1 } },
       ]);
     return result;
+  }
+
+  async getCvInWeek() {
+    const now = new Date();
+    const allResume = await this.resumeModel.find({});
+    console.log(allResume.length);
+    const result = allResume.filter((item) => {
+      const targetDateTime = new Date(item.updatedAt);
+      const difference = differenceInSeconds(
+        targetDateTime,
+        now,
+      );
+      console.log('>>> check difference', difference);
+      if (difference - 7 * 24 * 60 * 60 < 0) {
+        return item;
+      }
+    });
+    return result.length;
   }
 }
