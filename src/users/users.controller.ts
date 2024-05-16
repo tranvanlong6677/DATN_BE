@@ -79,7 +79,6 @@ export class UsersController {
     @User() user: IUser,
     @Param('id') id: string,
   ) {
-    console.log('admin');
     return this.usersService.updateById(
       id,
       updateUserDtoByAdmin,

@@ -33,6 +33,7 @@ export class ResumesController {
     @Body() creatUserCvDto: CreatUserCvDto,
     @User() user: IUser,
   ) {
+    console.log('>>> check create', creatUserCvDto);
     return this.resumesService.create(creatUserCvDto, user);
   }
 
@@ -63,6 +64,7 @@ export class ResumesController {
     @Body() updateResumeDto: UpdateResumeDto,
     @User() user: IUser,
   ) {
+    console.log('updateResumeDto', updateResumeDto);
     return this.resumesService.update(
       id,
       updateResumeDto,

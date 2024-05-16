@@ -41,7 +41,7 @@ export class DatabasesService implements OnModuleInit {
     private userService: UsersService,
   ) {}
   async onModuleInit() {
-    console.log(`The module has been initialized.`);
+    this.logger.log(`The module has been initialized.`);
     const isInit =
       this.configService.get<string>('SHOULD_INIT');
     if (Boolean(isInit)) {

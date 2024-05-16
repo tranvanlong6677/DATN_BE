@@ -32,6 +32,7 @@ export class CompaniesService {
           _id: new mongoose.mongo.ObjectId(user._id),
           email: user.email,
         },
+        logo: '',
       })
     ).toObject();
     return { ...result };
@@ -97,6 +98,10 @@ export class CompaniesService {
     updateCompanyDto: UpdateCompanyDto,
     user: IUser,
   ) {
+    console.log(
+      '>>> check updateCompanyDto',
+      updateCompanyDto,
+    );
     return await this.companyModel.updateOne(
       { _id: id },
       {

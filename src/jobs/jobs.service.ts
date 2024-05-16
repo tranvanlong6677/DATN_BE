@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Injectable } from '@nestjs/common';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
@@ -65,6 +66,57 @@ export class JobsService {
   async findOne(id: string) {
     const result = await this.jobModel.findOne({ _id: id });
     return result;
+  }
+
+  async findJobBySkillsAndLocation(
+    skills: string[],
+    location: string[],
+    query: string,
+  ) {
+    // let { sort } = aqp(query);
+    // const defaultLimit = +limit ? +limit : 10;
+    // const offset = (+currentPage - 1) * defaultLimit;
+    // delete filter.current;
+    // delete filter.pageSize;
+    console.log('>>> check query: ' + query);
+    const { filter, population } = aqp(query);
+    console.log(
+      '>>> check filter: ' + JSON.stringify(filter),
+    );
+    const { current, pageSize } = filter;
+    console.log('>>> checkk currently: ' + current);
+    console.log('>>> checkk pageSize: ' + pageSize);
+    const offset = (+current - 1) * +pageSize;
+    const totalItemsSearch = (
+      await this.jobModel.find({
+        skills: { $in: skills },
+        location: { $in: location },
+      })
+    ).length;
+    const result = await this.jobModel
+      .find({
+        skills: { $in: skills },
+        location: { $in: location },
+      })
+      .limit(pageSize)
+      .skip(offset);
+
+    console.log(result.length);
+    console.log('>>> check display jobs: ' + result);
+
+    return {
+      meta: {
+        current: +current, //trang hiện tại
+        pageSize: +pageSize, //số lượng bản ghi đã lấy
+        pages: Math.ceil(totalItemsSearch / +pageSize), //tổng số trang với điều kiện query
+        total: totalItemsSearch, // tổng số phần tử (số bản ghi)
+      },
+      result: result && result.length > 0 ? result : [],
+    };
+  }
+
+  async getJobByCompany() {
+    return 'aaa';
   }
 
   async update(

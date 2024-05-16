@@ -11,6 +11,7 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { TransformInterceptor } from './core/transform.interceptor';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const cloudinary = require('cloudinary').v2;
 
 async function bootstrap() {

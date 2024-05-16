@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import {
@@ -13,6 +14,7 @@ import {
   ParseFilePipeBuilder,
   HttpStatus,
   UseFilters,
+  Req,
 } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { CreateFileDto } from './dto/create-file.dto';
@@ -33,6 +35,8 @@ import {
 } from 'src/resumes/schema/resume.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import * as fs from 'fs';
+import { Request } from 'express';
+import { Company } from 'src/companies/schema/company.schema';
 const cloudinary = require('cloudinary').v2;
 
 @Controller('files')
@@ -41,6 +45,9 @@ export class FilesController {
     private readonly filesService: FilesService,
     @InjectModel(Resume.name)
     private resumeModel: SoftDeleteModel<ResumeDocument>,
+
+    @InjectModel(Company.name)
+    private companyModel: SoftDeleteModel<ResumeDocument>,
   ) {}
 
   @Post('upload')
@@ -65,19 +72,34 @@ export class FilesController {
     file: Express.Multer.File,
     @User() user: IUser,
     @Body() body: any,
+    @Req() req: Request,
   ) {
+    console.log('body >>>>', JSON.stringify(body));
+
     const resultUploadCloud =
       await cloudinary.uploader.upload(
         `${join(
           process.cwd(),
-          `public/images/resume/${file.filename}`,
+          `public/images/${
+            req.headers.folder_type === 'resume'
+              ? 'resume'
+              : req.headers.folder_type === 'company'
+              ? 'company'
+              : ''
+          }/${file.filename}`,
         )}`,
         {
           public_id: `${file.filename
             .split('.')
             .slice(0, -1)
             .join('.')}`,
-          folder: 'resumes',
+          folder: `${
+            req.headers.folder_type === 'resume'
+              ? 'resume'
+              : req.headers.folder_type === 'company'
+              ? 'company'
+              : ''
+          }`,
           resource_type: 'image',
         },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -92,14 +114,34 @@ export class FilesController {
       '..',
       'public',
       'images',
-      'resume',
+      `${
+        req.headers.folder_type === 'resume'
+          ? 'resume'
+          : req.headers.folder_type === 'company'
+          ? 'company'
+          : ''
+      }`,
       `${file.filename}`,
     );
     fs.unlinkSync(filePath);
-    await this.resumeModel.updateOne(
-      { userId: user._id, jobId: body.jobId },
-      { url: resultUploadCloud?.url },
+    if (req.headers.folder_type === 'resume') {
+      await this.resumeModel.updateOne(
+        { userId: user._id, jobId: body.jobId },
+        { url: resultUploadCloud?.url },
+      );
+    }
+
+    console.log(
+      '>>> check resultUploadCloud',
+      resultUploadCloud,
     );
+    console.log('>>>fsbifbaisdf', resultUploadCloud?.url);
+    if (req.headers.folder_type === 'company') {
+      await this.companyModel.updateOne(
+        { _id: body.companyId },
+        { logo: resultUploadCloud?.url },
+      );
+    }
     return {
       fileName: file.filename,
       url: resultUploadCloud?.url,

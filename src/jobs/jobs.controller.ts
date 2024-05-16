@@ -18,6 +18,7 @@ import {
   User,
 } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
+import { SearchJobBody } from './dto/search-job.dto';
 
 @Controller('jobs')
 export class JobsController {
@@ -29,6 +30,7 @@ export class JobsController {
     @Body() createJobDto: CreateJobDto,
     @User() user: IUser,
   ) {
+    console.log('>>> check body', createJobDto);
     return this.jobsService.create(createJobDto, user);
   }
 
@@ -48,6 +50,38 @@ export class JobsController {
   @ResponseMessage('Fetch a job by id')
   findOne(@Param('id') id: string, @User() user: IUser) {
     return this.jobsService.findOne(id);
+  }
+
+  @Post('/search-jobs')
+  @Public()
+  @ResponseMessage('Search jobs by skill and location')
+  findJobBySkillsAndLocation(
+    // @Param('id') id: string,
+    @User() user: IUser,
+    @Body() searchJobBody: SearchJobBody,
+  ) {
+    // return this.jobsService.findOne(id);
+    console.log('>>> check serach job', searchJobBody);
+    return this.jobsService.findJobBySkillsAndLocation(
+      searchJobBody.skills,
+      searchJobBody.location,
+      searchJobBody.query,
+    );
+  }
+  @Post('/company_id=?companyId')
+  @Public()
+  @ResponseMessage('Fetch jobs by company')
+  fetchJobByCompanyId(
+    // @Param('id') id: string,
+    @User() user: IUser,
+    @Query() companyId: string,
+  ) {
+    // return this.jobsService.findOne(id);
+    console.log(
+      '>>> check fetch job by company',
+      companyId,
+    );
+    return this.jobsService.getJobByCompany();
   }
 
   @Patch(':id')

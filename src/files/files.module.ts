@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Module } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { FilesController } from './files.controller';
@@ -8,6 +9,10 @@ import {
   Resume,
   ResumeSchema,
 } from 'src/resumes/schema/resume.schema';
+import {
+  Company,
+  CompanySchema,
+} from 'src/companies/schema/company.schema';
 
 @Module({
   imports: [
@@ -16,6 +21,9 @@ import {
     }),
     MongooseModule.forFeature([
       { name: Resume.name, schema: ResumeSchema },
+    ]),
+    MongooseModule.forFeature([
+      { name: Company.name, schema: CompanySchema },
     ]),
   ],
   controllers: [FilesController],

@@ -66,6 +66,7 @@ export class AuthService {
   }
   async login(user: IUser, response: Response) {
     const { _id, name, email, role, permissions } = user;
+    console.log('>>> check user login', user);
     const payload = {
       sub: 'token login',
       iss: 'from server',
@@ -88,6 +89,11 @@ export class AuthService {
         ),
       ),
     });
+    const dataFull: any = await this.usersService.findOne(
+      _id,
+    );
+
+    console.log('>>> check dataFUll', dataFull);
     return {
       access_token: this.jwtService.sign(payload),
       user: {
@@ -96,6 +102,12 @@ export class AuthService {
         email,
         role,
         permissions,
+        company: dataFull?.company
+          ? dataFull?.company
+          : { _id: '', name: '' },
+        gender: dataFull?.gender ? dataFull?.gender : '',
+        age: dataFull?.age ? dataFull?.age : '',
+        address: dataFull?.address ? dataFull?.address : '',
       },
     };
   }

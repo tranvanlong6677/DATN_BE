@@ -27,7 +27,7 @@ export class CompaniesController {
 
   @Get()
   @Public()
-  @ResponseMessage('Get data success!')
+  @ResponseMessage('Get data company success!')
   findAll(
     @Query('current') currentPage: string,
     @Query('pageSize') limit: string,
@@ -48,10 +48,16 @@ export class CompaniesController {
   }
 
   @Post()
+  @ResponseMessage('Create company successfully')
   create(
     @Body() createCompanyDto: CreateCompanyDto,
     @User() user: IUser,
   ) {
+    console.log(
+      '>>> check createCompanyDto',
+      createCompanyDto,
+    );
+
     return this.companiesService.create(
       createCompanyDto,
       user,
@@ -59,11 +65,17 @@ export class CompaniesController {
   }
 
   @Patch(':id')
+  @ResponseMessage('Update company successfully')
   update(
     @Param('id') id: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
     @User() user: IUser,
   ) {
+    console.log(
+      '>>> check updateCompanyDto controller',
+      updateCompanyDto,
+    );
+
     return this.companiesService.update(
       id,
       updateCompanyDto,
@@ -72,6 +84,7 @@ export class CompaniesController {
   }
 
   @Delete(':id')
+  @ResponseMessage('Delete company successfully')
   remove(@Param('id') id: string, @User() user: IUser) {
     return this.companiesService.remove(id, user);
   }

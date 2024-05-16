@@ -84,7 +84,10 @@ export class AuthController {
       gender: userFull.gender,
       age: userFull.age + '',
       address: userFull.address,
+      company: userFull.company,
     };
+    console.log('>>> check useerResult', userResult);
+
     return { user: userResult };
   }
 
