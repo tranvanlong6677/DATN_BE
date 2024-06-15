@@ -17,12 +17,18 @@ import mongoose from 'mongoose';
 import aqp from 'api-query-params';
 import { isEmpty } from 'class-validator';
 import { differenceInSeconds } from 'date-fns';
+import {
+  User,
+  UserDocument,
+} from 'src/users/schemas/user.schema';
 
 @Injectable()
 export class ResumesService {
   constructor(
     @InjectModel(Resume.name)
     private resumeModel: SoftDeleteModel<ResumeDocument>,
+    @InjectModel(User.name)
+    private userModel: SoftDeleteModel<UserDocument>,
   ) {}
 
   async create(
@@ -31,7 +37,6 @@ export class ResumesService {
   ) {
     const newId = new mongoose.Types.ObjectId();
     const newDate = new Date();
-    console.log('createUserCvDto', creatUserCvDto);
     const isExist = await this.resumeModel.findOne({
       userId: user._id,
       companyId: creatUserCvDto.companyId,
@@ -93,39 +98,93 @@ export class ResumesService {
     currentPage: string,
     limit: string,
     qs: string,
+    user: IUser,
   ) {
     const { filter, population, projection } = aqp(qs);
+
     let { sort } = aqp(qs);
     const defaultLimit = +limit ? +limit : 10;
     const offset = (+currentPage - 1) * defaultLimit;
     delete filter.current;
     delete filter.pageSize;
+    if (user?.role?.name === 'HR') {
+      const userInfo = (await this.userModel.find({
+        _id: user._id,
+      })) as any;
+      const userClone = JSON.parse(
+        JSON.stringify(userInfo),
+      );
+      const companyId = userClone[0]?.company?._id;
 
-    const totalItems = (await this.resumeModel.find(filter))
-      .length;
-    const totalPages = Math.ceil(totalItems / defaultLimit);
-    if (isEmpty(sort)) {
-      // @ts-ignore: Unreachable code error
-      sort = '-updatedAt';
+      const totalItems = (
+        await this.resumeModel.find({
+          ...filter,
+          companyId: companyId,
+        })
+      ).length;
+      console.log('>>> check total items: ' + totalItems);
+      const totalPages = Math.ceil(
+        totalItems / defaultLimit,
+      );
+      if (isEmpty(sort)) {
+        // @ts-ignore: Unreachable code error
+        sort = '-updatedAt';
+      }
+
+      const result = await this.resumeModel
+        .find({
+          ...filter,
+          companyId: companyId,
+        })
+        .skip(offset)
+        .limit(defaultLimit)
+        // @ts-ignore: Unreachable code error
+        .sort(sort)
+        .populate(population)
+        .select(projection as any)
+        .exec();
+      console.log('>>> check result: ' + result);
+      return {
+        meta: {
+          current: +currentPage, //trang hiện tại
+          pageSize: defaultLimit, //số lượng bản ghi đã lấy
+          pages: totalPages, //tổng số trang với điều kiện query
+          total: totalItems, // tổng số phần tử (số bản ghi)
+        },
+        result, //kết quả query
+      };
+    } else {
+      const totalItems = (
+        await this.resumeModel.find(filter)
+      ).length;
+      const totalPages = Math.ceil(
+        totalItems / defaultLimit,
+      );
+      if (isEmpty(sort)) {
+        // @ts-ignore: Unreachable code error
+        sort = '-updatedAt';
+      }
+
+      const result = await this.resumeModel
+        .find({ ...filter })
+        .skip(offset)
+        .limit(defaultLimit)
+        // @ts-ignore: Unreachable code error
+        .sort(sort)
+        .populate(population)
+        .select(projection as any)
+        .exec();
+
+      return {
+        meta: {
+          current: +currentPage, //trang hiện tại
+          pageSize: defaultLimit, //số lượng bản ghi đã lấy
+          pages: totalPages, //tổng số trang với điều kiện query
+          total: totalItems, // tổng số phần tử (số bản ghi)
+        },
+        result, //kết quả query
+      };
     }
-    const result = await this.resumeModel
-      .find(filter)
-      .skip(offset)
-      .limit(defaultLimit)
-      // @ts-ignore: Unreachable code error
-      .sort(sort)
-      .populate(population)
-      .select(projection as any)
-      .exec();
-    return {
-      meta: {
-        current: +currentPage, //trang hiện tại
-        pageSize: defaultLimit, //số lượng bản ghi đã lấy
-        pages: totalPages, //tổng số trang với điều kiện query
-        total: totalItems, // tổng số phần tử (số bản ghi)
-      },
-      result, //kết quả query
-    };
   }
 
   async findOne(id: string) {
@@ -192,14 +251,12 @@ export class ResumesService {
   async getCvInWeek() {
     const now = new Date();
     const allResume = await this.resumeModel.find({});
-    console.log(allResume.length);
     const result = allResume.filter((item) => {
       const targetDateTime = new Date(item.updatedAt);
       const difference = differenceInSeconds(
         targetDateTime,
         now,
       );
-      console.log('>>> check difference', difference);
       if (difference - 7 * 24 * 60 * 60 < 0) {
         return item;
       }

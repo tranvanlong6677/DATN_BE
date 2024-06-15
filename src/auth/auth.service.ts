@@ -93,7 +93,6 @@ export class AuthService {
       _id,
     );
 
-    console.log('>>> check dataFUll', dataFull);
     return {
       access_token: this.jwtService.sign(payload),
       user: {

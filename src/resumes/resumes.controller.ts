@@ -33,21 +33,23 @@ export class ResumesController {
     @Body() creatUserCvDto: CreatUserCvDto,
     @User() user: IUser,
   ) {
-    console.log('>>> check create', creatUserCvDto);
     return this.resumesService.create(creatUserCvDto, user);
   }
 
   @Get()
   @ResponseMessage('Fetch all resumes with paginate')
   findAll(
+    @User() user: IUser,
     @Query('pageSize') pageSize: string,
     @Query('current') current: string,
     @Query() qs: string,
   ) {
+    console.log('>>> check user ', user);
     return this.resumesService.findAll(
       current,
       pageSize,
       qs,
+      user,
     );
   }
 
@@ -64,7 +66,6 @@ export class ResumesController {
     @Body() updateResumeDto: UpdateResumeDto,
     @User() user: IUser,
   ) {
-    console.log('updateResumeDto', updateResumeDto);
     return this.resumesService.update(
       id,
       updateResumeDto,

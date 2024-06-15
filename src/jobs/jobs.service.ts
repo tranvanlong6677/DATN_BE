@@ -9,6 +9,7 @@ import { IUser } from 'src/users/users.interface';
 import mongoose from 'mongoose';
 import aqp from 'api-query-params';
 import { isEmpty } from 'class-validator';
+import { isBefore } from 'date-fns';
 
 @Injectable()
 export class JobsService {
@@ -16,6 +17,10 @@ export class JobsService {
     @InjectModel(Job.name)
     private jobModel: SoftDeleteModel<JobDocument>,
   ) {}
+  isJobExpired(expiryDate) {
+    const currentDate = new Date();
+    return isBefore(new Date(expiryDate), currentDate);
+  }
   async create(createJobDto: CreateJobDto, user: IUser) {
     const result = await this.jobModel.create({
       ...createJobDto,
@@ -30,6 +35,7 @@ export class JobsService {
     limit: string,
     qs: string,
   ) {
+    const currentDate = new Date();
     const { filter, population } = aqp(qs);
     let { sort } = aqp(qs);
     const defaultLimit = +limit ? +limit : 10;
@@ -37,21 +43,27 @@ export class JobsService {
     delete filter.current;
     delete filter.pageSize;
 
-    const totalItems = (await this.jobModel.find(filter))
-      .length;
+    const totalItems = (
+      await this.jobModel.find({
+        ...filter,
+        endDate: { $gte: currentDate },
+      })
+    ).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
     if (isEmpty(sort)) {
       // @ts-ignore: Unreachable code error
       sort = '-updatedAt';
     }
+
     const result = await this.jobModel
-      .find(filter)
+      .find({ ...filter, endDate: { $gte: currentDate } })
       .skip(offset)
       .limit(defaultLimit)
       // @ts-ignore: Unreachable code error
       .sort(sort)
       .populate(population)
       .exec();
+
     return {
       meta: {
         current: +currentPage, //trang hiện tại
@@ -71,6 +83,8 @@ export class JobsService {
   async findJobBySkillsAndLocation(
     skills: string[],
     location: string[],
+    level: string,
+    salary: string,
     query: string,
   ) {
     // let { sort } = aqp(query);
@@ -78,31 +92,79 @@ export class JobsService {
     // const offset = (+currentPage - 1) * defaultLimit;
     // delete filter.current;
     // delete filter.pageSize;
-    console.log('>>> check query: ' + query);
+    const currentDate = new Date();
     const { filter, population } = aqp(query);
-    console.log(
-      '>>> check filter: ' + JSON.stringify(filter),
-    );
     const { current, pageSize } = filter;
-    console.log('>>> checkk currently: ' + current);
-    console.log('>>> checkk pageSize: ' + pageSize);
-    const offset = (+current - 1) * +pageSize;
-    const totalItemsSearch = (
-      await this.jobModel.find({
-        skills: { $in: skills },
-        location: { $in: location },
-      })
-    ).length;
-    const result = await this.jobModel
-      .find({
-        skills: { $in: skills },
-        location: { $in: location },
-      })
-      .limit(pageSize)
-      .skip(offset);
 
-    console.log(result.length);
-    console.log('>>> check display jobs: ' + result);
+    const offset = (+current - 1) * +pageSize;
+    let minSalary = 0;
+    let maxSalary = 0;
+
+    if (salary === '0') {
+      minSalary = 0;
+      maxSalary = 5000000;
+    }
+    if (salary === '1') {
+      minSalary = 5000000;
+      maxSalary = 10000000;
+    }
+    if (salary === '2') {
+      minSalary = 10000000;
+      maxSalary = 15000000;
+    }
+    if (salary === '3') {
+      minSalary = 1500000;
+      maxSalary = 20000000;
+    }
+    if (salary === '4') {
+      minSalary = 20000000;
+      maxSalary = 25000000;
+    }
+    if (salary === '5') {
+      minSalary = 25000001;
+      maxSalary = 1000000000;
+    }
+    const totalItemsSearch =
+      salary === '-1'
+        ? (
+            await this.jobModel.find({
+              skills: { $in: skills },
+              location: { $in: location },
+              level: level,
+              endDate: { $gte: currentDate },
+              // salary: salary,
+            })
+          ).length
+        : (
+            await this.jobModel.find({
+              skills: { $in: skills },
+              location: { $in: location },
+              level: level,
+              salary: { $gte: minSalary, $lte: maxSalary },
+              endDate: { $gte: currentDate },
+            })
+          ).length;
+    const result =
+      salary === '-1'
+        ? await this.jobModel
+            .find({
+              skills: { $in: skills },
+              location: { $in: location },
+              level: level,
+              endDate: { $gte: currentDate },
+            })
+            .limit(pageSize)
+            .skip(offset)
+        : await this.jobModel
+            .find({
+              skills: { $in: skills },
+              location: { $in: location },
+              level: level,
+              salary: { $gte: minSalary, $lte: maxSalary },
+              endDate: { $gte: currentDate },
+            })
+            .limit(pageSize)
+            .skip(offset);
 
     return {
       meta: {

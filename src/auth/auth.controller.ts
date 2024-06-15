@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Controller,
   Get,
@@ -75,7 +76,6 @@ export class AuthController {
     const temp = (await await this.rolesService.findOne(
       user.role._id,
     )) as any;
-    // console.log('temp', temp);
     user.permissions = temp.permissions;
     // user.gender = userFull.gender;
     const userResult = {
@@ -86,8 +86,6 @@ export class AuthController {
       address: userFull.address,
       company: userFull.company,
     };
-    console.log('>>> check useerResult', userResult);
-
     return { user: userResult };
   }
 

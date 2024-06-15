@@ -9,5 +9,11 @@ export class SearchJobBody {
   location: string[];
 
   @IsNotEmpty()
+  level: string;
+
+  @IsNotEmpty()
+  salary: string;
+
+  @IsNotEmpty()
   query: string;
 }

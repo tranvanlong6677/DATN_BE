@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Controller,
   Get,
@@ -68,7 +69,6 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
     @User() user: IUser,
   ) {
-    console.log('updateUserDto', updateUserDto);
     return this.usersService.update(updateUserDto, user);
   }
 
@@ -86,7 +86,7 @@ export class UsersController {
     );
   }
 
-  @Patch('/change-password')
+  @Patch('/password/change')
   @ResponseMessage('Update password successfully')
   changePassword(@User() user: IUser, @Body() body) {
     const { oldPassword, newPassword } = body;

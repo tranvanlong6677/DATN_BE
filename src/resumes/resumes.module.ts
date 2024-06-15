@@ -6,6 +6,10 @@ import {
   Resume,
   ResumeSchema,
 } from './schema/resume.schema';
+import {
+  User,
+  UserSchema,
+} from 'src/users/schemas/user.schema';
 
 @Module({
   controllers: [ResumesController],
@@ -13,6 +17,7 @@ import {
   imports: [
     MongooseModule.forFeature([
       { name: Resume.name, schema: ResumeSchema },
+      { name: User.name, schema: UserSchema },
     ]),
   ],
 })

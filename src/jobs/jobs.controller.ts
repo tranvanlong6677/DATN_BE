@@ -30,7 +30,6 @@ export class JobsController {
     @Body() createJobDto: CreateJobDto,
     @User() user: IUser,
   ) {
-    console.log('>>> check body', createJobDto);
     return this.jobsService.create(createJobDto, user);
   }
 
@@ -61,10 +60,12 @@ export class JobsController {
     @Body() searchJobBody: SearchJobBody,
   ) {
     // return this.jobsService.findOne(id);
-    console.log('>>> check serach job', searchJobBody);
+    console.log('>>> check search job', searchJobBody);
     return this.jobsService.findJobBySkillsAndLocation(
       searchJobBody.skills,
       searchJobBody.location,
+      searchJobBody.level,
+      searchJobBody.salary,
       searchJobBody.query,
     );
   }

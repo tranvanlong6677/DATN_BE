@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
   Injectable,
@@ -74,6 +75,7 @@ export class UsersService {
       .length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
     if (isEmpty(sort)) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore: Unreachable code error
       sort = '-updatedAt';
     }
@@ -82,6 +84,7 @@ export class UsersService {
       .skip(offset)
       .limit(defaultLimit)
       .select('-password')
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore: Unreachable code error
       .sort(sort)
       .populate(population)
@@ -126,7 +129,6 @@ export class UsersService {
   }
 
   async update(updateUserDto: UpdateUserDto, user: IUser) {
-    console.log('check service', updateUserDto);
     return await this.userModel.updateOne(
       { _id: user._id },
       {
@@ -139,10 +141,6 @@ export class UsersService {
     updateUserDtoByAdmin: UpdateUserDtoByAdmin,
     user: IUser,
   ) {
-    console.log(
-      'updateUserDtoByAdmin',
-      updateUserDtoByAdmin,
-    );
     return await this.userModel.updateOne(
       { _id: id },
       {

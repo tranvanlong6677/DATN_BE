@@ -36,15 +36,18 @@ export class MailController {
   @Get()
   @Public()
   @ResponseMessage('Test email')
-  @Cron('* 0 0 * * 0')
-  // @Cron(CronExpression.EVERY_10_SECONDS)
+  // @Cron('* 0 0 * * 0')
+  @Cron(CronExpression.EVERY_DAY_AT_NOON)
   async handleTestEmail(@User() user: IUser) {
     const subscribers = await this.subscriberModel.find({});
+    const currentDate = new Date();
+
     for (const subs of subscribers) {
       const subsSkills = subs.skills;
       const jobWithMatchingSkills =
         await this.jobModel.find({
           skills: { $in: subsSkills },
+          endDate: { $gte: currentDate },
         });
       if (jobWithMatchingSkills?.length > 0) {
         const jobs = jobWithMatchingSkills.map((item) => {
@@ -57,6 +60,7 @@ export class MailController {
                 ',',
               ) + ' đ',
             skills: item.skills,
+            id: item.id,
           };
         });
         await this.mailerService.sendMail({

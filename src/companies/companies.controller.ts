@@ -53,11 +53,6 @@ export class CompaniesController {
     @Body() createCompanyDto: CreateCompanyDto,
     @User() user: IUser,
   ) {
-    console.log(
-      '>>> check createCompanyDto',
-      createCompanyDto,
-    );
-
     return this.companiesService.create(
       createCompanyDto,
       user,
@@ -71,11 +66,6 @@ export class CompaniesController {
     @Body() updateCompanyDto: UpdateCompanyDto,
     @User() user: IUser,
   ) {
-    console.log(
-      '>>> check updateCompanyDto controller',
-      updateCompanyDto,
-    );
-
     return this.companiesService.update(
       id,
       updateCompanyDto,

@@ -74,8 +74,6 @@ export class FilesController {
     @Body() body: any,
     @Req() req: Request,
   ) {
-    console.log('body >>>>', JSON.stringify(body));
-
     const resultUploadCloud =
       await cloudinary.uploader.upload(
         `${join(
@@ -131,11 +129,6 @@ export class FilesController {
       );
     }
 
-    console.log(
-      '>>> check resultUploadCloud',
-      resultUploadCloud,
-    );
-    console.log('>>>fsbifbaisdf', resultUploadCloud?.url);
     if (req.headers.folder_type === 'company') {
       await this.companyModel.updateOne(
         { _id: body.companyId },

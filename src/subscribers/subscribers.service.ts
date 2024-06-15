@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
   Injectable,
@@ -73,6 +74,7 @@ export class SubscribersService {
     ).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
     if (isEmpty(sort)) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore: Unreachable code error
       sort = '-updatedAt';
     }
@@ -81,6 +83,7 @@ export class SubscribersService {
       .skip(offset)
       .limit(defaultLimit)
       .select('-password')
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore: Unreachable code error
       .sort(sort)
       .populate(population)
