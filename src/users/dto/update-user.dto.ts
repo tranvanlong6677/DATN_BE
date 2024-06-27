@@ -26,7 +26,7 @@ export class UpdateUserDtoByAdmin {
   @IsNotEmpty()
   role: mongoose.Schema.Types.ObjectId;
 
-  // @IsNotEmpty()
+  @IsNotEmpty()
   company: Company;
 }
 

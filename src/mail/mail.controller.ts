@@ -35,7 +35,7 @@ export class MailController {
 
   @Get()
   @Public()
-  @ResponseMessage('Test email')
+  @ResponseMessage('Send email successfully')
   // @Cron('* 0 0 * * 0')
   @Cron(CronExpression.EVERY_DAY_AT_NOON)
   async handleTestEmail(@User() user: IUser) {

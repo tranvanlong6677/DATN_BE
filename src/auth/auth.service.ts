@@ -66,7 +66,6 @@ export class AuthService {
   }
   async login(user: IUser, response: Response) {
     const { _id, name, email, role, permissions } = user;
-    console.log('>>> check user login', user);
     const payload = {
       sub: 'token login',
       iss: 'from server',
@@ -92,6 +91,12 @@ export class AuthService {
     const dataFull: any = await this.usersService.findOne(
       _id,
     );
+
+    if (dataFull?.isDeleted === true) {
+      throw new BadRequestException(
+        'Tài khoản đã bị xóa khỏi hệ thống',
+      );
+    }
 
     return {
       access_token: this.jwtService.sign(payload),

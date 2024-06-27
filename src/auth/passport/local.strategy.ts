@@ -9,6 +9,7 @@ import { AuthService } from '../auth.service';
 @Injectable()
 export class LocalStrategy extends PassportStrategy(
   Strategy,
+  // 'jwt',
 ) {
   constructor(private authService: AuthService) {
     super();
