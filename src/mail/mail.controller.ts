@@ -1,3 +1,4 @@
+import { convertSlug } from './../utils/function';
 import { Controller, Get } from '@nestjs/common';
 import { MailService } from './mail.service';
 import {
@@ -19,6 +20,7 @@ import {
   JobDocument,
 } from 'src/jobs/shema/job.schema';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { link } from 'fs';
 
 @Controller('mail')
 export class MailController {
@@ -61,8 +63,13 @@ export class MailController {
               ) + ' đ',
             skills: item.skills,
             id: item.id,
+            link: `http://localhost:3000/job/${convertSlug(
+              item.name,
+            )}?id=${item.id}`,
           };
         });
+        const jobsDisplay = jobs.slice(0, 5);
+        console.log('>>> check jobsDisplay', jobsDisplay);
         await this.mailerService.sendMail({
           to: [subs.email],
           from: '"Team vieclam.it" <support@example.com>',
@@ -73,7 +80,7 @@ export class MailController {
             userNameReceiver: subs.name,
             email: subs.email,
             imageUrl: `https://hust.edu.vn/uploads/sys/logo-dhbk-1-02_130_191.png`,
-            jobs: jobs,
+            jobs: jobsDisplay,
           },
         });
       }
