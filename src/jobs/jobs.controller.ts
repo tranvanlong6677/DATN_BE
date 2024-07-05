@@ -44,6 +44,22 @@ export class JobsController {
     return this.jobsService.findAll(current, pageSize, qs);
   }
 
+  @Post('/by-company')
+  @ResponseMessage('fetch job by company')
+  findJobByCompany(
+    @Query('current') current: string,
+    @Query('pageSize') pageSize: string,
+    @Query() qs: string,
+    @User() user: IUser,
+  ) {
+    return this.jobsService.findJobByCompany(
+      current,
+      pageSize,
+      qs,
+      user,
+    );
+  }
+
   @Get(':id')
   @Public()
   @ResponseMessage('Fetch a job by id')

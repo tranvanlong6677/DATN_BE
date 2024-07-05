@@ -10,12 +10,18 @@ import mongoose from 'mongoose';
 import aqp from 'api-query-params';
 import { isEmpty } from 'class-validator';
 import { isBefore } from 'date-fns';
+import {
+  User,
+  UserDocument,
+} from 'src/users/schemas/user.schema';
 
 @Injectable()
 export class JobsService {
   constructor(
     @InjectModel(Job.name)
     private jobModel: SoftDeleteModel<JobDocument>,
+    @InjectModel(User.name)
+    private userModel: SoftDeleteModel<UserDocument>,
   ) {}
   isJobExpired(expiryDate) {
     const currentDate = new Date();
@@ -64,6 +70,66 @@ export class JobsService {
       .populate(population)
       .exec();
 
+    return {
+      meta: {
+        current: +currentPage, //trang hiện tại
+        pageSize: defaultLimit, //số lượng bản ghi đã lấy
+        pages: totalPages, //tổng số trang với điều kiện query
+        total: totalItems, // tổng số phần tử (số bản ghi)
+      },
+      result, //kết quả query
+    };
+  }
+
+  async findJobByCompany(
+    currentPage: string,
+    limit: string,
+    qs: string,
+    user: IUser,
+  ) {
+    console.log('>>> check user', user);
+    const currentDate = new Date();
+    const { filter, population } = aqp(qs);
+    let { sort } = aqp(qs);
+    const defaultLimit = +limit ? +limit : 10;
+    const offset = (+currentPage - 1) * defaultLimit;
+    delete filter.current;
+    delete filter.pageSize;
+    const dataUserFull = await this.userModel.findOne({
+      _id: user?._id,
+    });
+    console.log(
+      '>>> check data full',
+      dataUserFull?.company?._id,
+    );
+    const companyId = dataUserFull?.company?._id;
+    const totalItems = (
+      await this.jobModel.find({
+        ...filter,
+        endDate: { $gte: currentDate },
+        'company._id': companyId,
+      })
+    ).length;
+
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+    if (isEmpty(sort)) {
+      // @ts-ignore: Unreachable code error
+      sort = '-updatedAt';
+    }
+
+    const result = await this.jobModel
+      .find({
+        ...filter,
+        endDate: { $gte: currentDate },
+        'company._id': companyId,
+      })
+      .skip(offset)
+      .limit(defaultLimit)
+      // @ts-ignore: Unreachable code error
+      .sort(sort)
+      .populate(population)
+      .exec();
+    console.log('>>> check result', result, totalItems);
     return {
       meta: {
         current: +currentPage, //trang hiện tại
