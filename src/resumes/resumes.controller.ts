@@ -44,7 +44,6 @@ export class ResumesController {
     @Query('current') current: string,
     @Query() qs: string,
   ) {
-    console.log('>>> check user ', user);
     return this.resumesService.findAll(
       current,
       pageSize,

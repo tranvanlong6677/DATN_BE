@@ -43,7 +43,6 @@ export class ResumesService {
       jobId: creatUserCvDto.jobId,
     });
     if (isExist) {
-      console.log('exist');
       await this.resumeModel.updateOne(
         { _id: isExist._id },
         {
@@ -122,7 +121,6 @@ export class ResumesService {
           companyId: companyId,
         })
       ).length;
-      console.log('>>> check total items: ' + totalItems);
       const totalPages = Math.ceil(
         totalItems / defaultLimit,
       );
@@ -143,7 +141,6 @@ export class ResumesService {
         .populate(population)
         .select(projection as any)
         .exec();
-      console.log('>>> check result: ' + result);
       return {
         meta: {
           current: +currentPage, //trang hiện tại

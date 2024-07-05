@@ -60,7 +60,6 @@ export class JobsController {
     @Body() searchJobBody: SearchJobBody,
   ) {
     // return this.jobsService.findOne(id);
-    console.log('>>> check search job', searchJobBody);
     return this.jobsService.findJobBySkillsAndLocation(
       searchJobBody.skills,
       searchJobBody.location,
