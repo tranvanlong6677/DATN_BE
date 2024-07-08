@@ -62,7 +62,7 @@ export class FilesController {
             /(jpg|jpeg|png|image\/png|image\/jpeg|gif|txt|pdf|doc|docx|text\/plain)$/i,
         })
         .addMaxSizeValidator({
-          maxSize: 1024 * 1024,
+          maxSize: 1024 * 1024 * 5,
         })
         .build({
           errorHttpStatusCode:

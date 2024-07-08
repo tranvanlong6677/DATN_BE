@@ -93,7 +93,7 @@ export class MulterConfigService
         } else cb(null, true);
       },
       limits: {
-        fileSize: 1024 * 1024 * 1, // 1MB
+        fileSize: 1024 * 1024 * 5, // 1MB
       },
     };
   }
