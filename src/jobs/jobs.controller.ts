@@ -43,7 +43,20 @@ export class JobsController {
   ) {
     return this.jobsService.findAll(current, pageSize, qs);
   }
-
+  @Post('/admin-page')
+  @ResponseMessage('fetch job in admin page')
+  findJobInAdminPageByAdmin(
+    @Query('current') current: string,
+    @Query('pageSize') pageSize: string,
+    @Query() qs: string,
+    @User() user: IUser,
+  ) {
+    return this.jobsService.findAllByAdmin(
+      current,
+      pageSize,
+      qs,
+    );
+  }
   @Post('/by-company')
   @ResponseMessage('fetch job by company')
   findJobByCompany(

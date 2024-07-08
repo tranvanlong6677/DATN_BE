@@ -53,6 +53,7 @@ export class JobsService {
       await this.jobModel.find({
         ...filter,
         endDate: { $gte: currentDate },
+        isActive: true,
       })
     ).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
@@ -62,7 +63,11 @@ export class JobsService {
     }
 
     const result = await this.jobModel
-      .find({ ...filter, endDate: { $gte: currentDate } })
+      .find({
+        ...filter,
+        endDate: { $gte: currentDate },
+        isActive: true,
+      })
       .skip(offset)
       .limit(defaultLimit)
       // @ts-ignore: Unreachable code error
@@ -81,6 +86,53 @@ export class JobsService {
     };
   }
 
+  async findAllByAdmin(
+    currentPage: string,
+    limit: string,
+    qs: string,
+  ) {
+    const currentDate = new Date();
+    const { filter, population } = aqp(qs);
+    let { sort } = aqp(qs);
+    const defaultLimit = +limit ? +limit : 10;
+    const offset = (+currentPage - 1) * defaultLimit;
+    delete filter.current;
+    delete filter.pageSize;
+
+    const totalItems = (
+      await this.jobModel.find({
+        ...filter,
+        endDate: { $gte: currentDate },
+      })
+    ).length;
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+    if (isEmpty(sort)) {
+      // @ts-ignore: Unreachable code error
+      sort = '-updatedAt';
+    }
+
+    const result = await this.jobModel
+      .find({
+        ...filter,
+        endDate: { $gte: currentDate },
+      })
+      .skip(offset)
+      .limit(defaultLimit)
+      // @ts-ignore: Unreachable code error
+      .sort(sort)
+      .populate(population)
+      .exec();
+
+    return {
+      meta: {
+        current: +currentPage, //trang hiện tại
+        pageSize: defaultLimit, //số lượng bản ghi đã lấy
+        pages: totalPages, //tổng số trang với điều kiện query
+        total: totalItems, // tổng số phần tử (số bản ghi)
+      },
+      result, //kết quả query
+    };
+  }
   async findJobByCompany(
     currentPage: string,
     limit: string,
@@ -98,10 +150,6 @@ export class JobsService {
     const dataUserFull = await this.userModel.findOne({
       _id: user?._id,
     });
-    console.log(
-      '>>> check data full',
-      dataUserFull?.company?._id,
-    );
     const companyId = dataUserFull?.company?._id;
     const totalItems = (
       await this.jobModel.find({
