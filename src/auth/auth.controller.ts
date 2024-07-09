@@ -64,6 +64,7 @@ export class AuthController {
   async handleRegister(
     @Body() registerUserDto: RegisterUserDto,
   ) {
+    console.log('>>> Register info', registerUserDto);
     return this.authService.register(registerUserDto);
   }
 

@@ -23,6 +23,7 @@ import {
 } from 'src/decorator/customize';
 import { IUser } from './users.interface';
 import { JwtStrategy } from 'src/auth/passport/jwt.strategy';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('users')
 export class UsersController {
@@ -88,7 +89,11 @@ export class UsersController {
 
   @Patch('/password/change')
   @ResponseMessage('Update password successfully')
-  changePassword(@User() user: IUser, @Body() body) {
+  changePassword(
+    @User() user: IUser,
+    @Body() body: ChangePasswordDto,
+  ) {
+    console.log('>>> check body change pass', body);
     const { oldPassword, newPassword } = body;
     return this.usersService.changePassword(
       user,

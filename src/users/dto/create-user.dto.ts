@@ -5,6 +5,9 @@ import {
   IsNotEmpty,
   IsNotEmptyObject,
   IsObject,
+  IsString,
+  Matches,
+  MinLength,
   ValidateNested,
 } from 'class-validator';
 import mongoose from 'mongoose';
@@ -24,6 +27,14 @@ export class RegisterUserDto {
   @IsNotEmpty({ message: 'Email khong duoc de trong' })
   email: string;
 
+  @IsString()
+  @MinLength(8, {
+    message: 'Mật khẩu phải có ít nhất 8 ký tự.',
+  })
+  @Matches(/^(?=.*[a-zA-Z])(?=.*[0-9]).*$/, {
+    message:
+      'Mật khẩu phải chứa ít nhất một chữ cái và một số.',
+  })
   @IsNotEmpty({ message: 'Password khong duoc de trong' })
   password: string;
 
